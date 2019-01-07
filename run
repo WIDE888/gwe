@@ -16,8 +16,69 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with gsi.  If not, see <http://www.gnu.org/licenses/>.
+from pprint import pprint
 
-from gwe import main
+from gwe.nvidia import nvcmd
+from gwe.nvidia.nvtarget import GPU, Cooler
 
 if __name__ == "__main__":
-    main.main()
+    nv = nvcmd.NVidiaControl()
+    nv.open()
+    gpu = GPU(nv.x_screen)
+    fan0 = Cooler(0)
+    # get_cooler_manual_control_enabled = nv.get_cooler_manual_control_enabled(gpu)
+    # get_fan_duty = nv.get_fan_duty(fan0)
+    # set_cooler_manual_control_enabled = nv.set_cooler_manual_control_enabled(fan0, True)
+    # get_cooler_manual_control_enabled = nv.get_cooler_manual_control_enabled(gpu)
+
+
+    d = {}
+    # for i in range(5000):
+    gpu = GPU(nv.x_screen)
+    fan0 = Cooler(0)
+
+    d["get_gpu_uuid"] = nv.get_gpu_uuid(gpu)
+    d["dversion"] = nv.get_driver_version(gpu)
+    d["gpu_count"] = nv.get_GPU_count()
+    d["bus_type"] = nv.get_bus_type(gpu)
+    d["os_type"] = nv.get_OS_type()
+    d["vram"] = nv.get_vram(gpu)
+    d["irq"] = nv.get_IRQ(gpu)
+    d["conn_disp"] = nv.get_connected_displays(gpu)
+    d["get_enabled_displays"] = nv.get_enabled_displays(gpu)
+    d["supports_framelock"] = nv.supports_framelock(gpu)
+    d["get_name"] = nv.get_name(gpu)
+    d["get_vbios_version"] = nv.get_vbios_version(gpu)
+    d["get_core_temp"] = nv.get_core_temp(gpu)
+    d["get_core_threshold"] = nv.get_core_threshold(gpu)
+    d["get_default_core_threshold"] = nv.get_default_core_threshold(gpu)
+    d["get_max_core_threshold"] = nv.get_max_core_threshold(gpu)
+    d["get_ambient_temp"] = nv.get_ambient_temp(gpu)
+    d["get_2D_clocks"] = nv.get_2D_clocks(gpu)
+    d["get_3D_clocks"] = nv.get_3D_clocks(gpu)
+    d["get_default_2D_clocks"] = nv.get_default_2D_clocks(gpu)
+    d["get_default_3D_clocks"] = nv.get_default_3D_clocks(gpu)
+    d["get_current_clocks"] = nv.get_current_clocks(gpu)
+    d["get_xinerama_enabled"] = nv.get_xinerama_enabled(gpu)
+    d["get_max_displays"] = nv.get_max_displays(gpu)
+    d["get_cuda_cores"] = nv.get_cuda_cores(gpu)
+    d["get_memory_bus_width"] = nv.get_memory_bus_width(gpu)
+    d["get_total_dedicated_gpu_memory"] = nv.get_total_dedicated_gpu_memory(gpu)
+    d["get_used_dedicated_gpu_memory"] = nv.get_used_dedicated_gpu_memory(gpu)
+    d["get_pcie_current_link_width"] = nv.get_pcie_current_link_width(gpu)
+    d["get_pcie_generation"] = nv.get_pcie_generation(gpu)
+    d["get_gpu_utilization"] = nv.get_gpu_utilization(gpu)
+    d["get_video_encoder_utilization"] = nv.get_video_encoder_utilization(gpu)
+    d["get_video_decoder_utilization"] = nv.get_video_decoder_utilization(gpu)
+    d["get_performance_modes"] = nv.get_performance_modes(gpu)
+    d["get_gpu_nvclock_offset"] = nv.get_gpu_nvclock_offset(gpu)
+    d["get_gpu_nvclock_offset_range"] = nv.get_gpu_nvclock_offset_range(gpu)
+    d["get_mem_transfer_rate_offset"] = nv.get_mem_transfer_rate_offset(gpu)
+    d["get_mem_transfer_rate_offset_range"] = nv.get_mem_transfer_rate_offset_range(gpu)
+    d["get_fan_duty"] = nv.get_fan_duty(fan0)
+    d["get_fan_rpm"] = nv.get_fan_rpm(fan0)
+
+    print("\n")
+    print("result:")
+    pprint(d)
+    nv.close()
