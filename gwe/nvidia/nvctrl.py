@@ -4877,7 +4877,7 @@ class NVCtrlQueryAttributeReply:
 # NV-CONTROL Set Attribute And Get Status
 #
 class NVCtrlSetAttributeAndGetStatusRequest:
-    def __init__(self, opcode, screen, display_mask, attr, value) ->None:
+    def __init__(self, opcode, screen, display_mask, attr, value) -> None:
         self.encoding = minx.encode(
             XData('CARD8', 1, opcode),
             XData('CARD8', 1, _X_nvCtrlSetAttributeAndGetStatus),
@@ -5419,7 +5419,7 @@ class NVidiaControlLowLevel:
         if not isinstance(target, GPU):
             raise ValueError('GetValidAttributeValues can only be executed on a GPU')
 
-        vv = self.query_valid_attr_values(target.id(), NV_CTRL_TARGET_TYPE_GPU, attr)
+        vv = self.query_valid_attr_values(target, NV_CTRL_TARGET_TYPE_GPU, attr)
 
         return vv
 
@@ -5442,7 +5442,7 @@ class NVidiaControlLowLevel:
             mask += (1 << self._displaystr2num(d))
         return mask
 
-    def _mask2displays(self, mask):
+    def mask2displays(self, mask: int) -> List[str]:
         """return an array of display numbers from a display mask."""
         displays = []
         for i in range(32):
@@ -5450,7 +5450,7 @@ class NVidiaControlLowLevel:
                 displays.append(self._displaynum2str(i))
         return displays
 
-    def _displaynum2str(self, num):
+    def _displaynum2str(self, num: int) -> str:
         """return a string uniquely representing a display number"""
         if num > 15:
             return 'DFP-%d' % (num - 16)
@@ -5459,7 +5459,8 @@ class NVidiaControlLowLevel:
         else:
             return 'CRT-%d' % (num)
 
-    def _displaystr2num(self, st):
+    @staticmethod
+    def _displaystr2num(st) -> int:
         """return a display number from a string"""
         num = None
         for s, n in [('DFP-', 16), ('TV-', 8), ('CRT-', 0)]:
