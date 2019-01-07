@@ -207,7 +207,7 @@ class MainPresenter:
     def _on_status_updated(self, status: Optional[Status]) -> None:
         if status is not None:
             gpu_status = status.gpu_status_list[0]
-            self._update_fan(gpu_status)
+            # self._update_fan(gpu_status)
             self.main_view.refresh_status(status)
             self._historical_data_presenter.add_status(status)
         else:

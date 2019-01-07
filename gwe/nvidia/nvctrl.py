@@ -22,6 +22,7 @@
 #
 import logging
 import sys
+from pprint import pprint
 from typing import Tuple, List, Any
 
 from gwe.nvidia import minx, xnet
@@ -4985,23 +4986,31 @@ class _NVCtrlQueryBinaryDataReply:
     if u query something that might not be there"""
 
     def __init__(self, encoding: bytes) -> None:
-        xreply, ad = minx.decode(encoding,
-                                 XData('BYTE', 1, 'type'),
-                                 XData('PAD', 1, 'pad0'),
-                                 XData('CARD16', 1, 'sequence_number'),
-                                 XData('CARD32', 1, 'length'),
-                                 XData('CARD32', 1, 'flags'),
-                                 XData('CARD32', 1, 'n'),
-                                 XData('CARD32', 1, 'pad4'),
-                                 XData('CARD32', 1, 'pad5'),
-                                 XData('CARD32', 1, 'pad6'),
-                                 XData('CARD32', 1, 'pad7'))
+        x_reply, ad = minx.decode(encoding,
+                                  XData('BYTE', 1, 'type'),
+                                  XData('PAD', 1, 'pad0'),
+                                  XData('CARD16', 1, 'sequence_number'),
+                                  XData('CARD32', 1, 'length'),
+                                  XData('CARD32', 1, 'flags'),
+                                  XData('CARD32', 1, 'n'),
+                                  XData('CARD32', 1, 'pad4'),
+                                  XData('CARD32', 1, 'pad5'),
+                                  XData('CARD32', 1, 'pad6'),
+                                  XData('CARD32', 1, 'pad7'))
 
-        for n, v in xreply.items():
-            setattr(self, n, v)
+        self.type = x_reply['type']
+        self.pad0 = x_reply['pad0']
+        self.sequence_number = x_reply['sequence_number']
+        self.length = x_reply['length']
+        self.flags = x_reply['flags']
+        self.n = x_reply['n']
+        self.pad4 = x_reply['pad4']
+        self.pad5 = x_reply['pad5']
+        self.pad6 = x_reply['pad6']
+        self.pad7 = x_reply['pad7']
 
-        rs, ad = minx.decode(ad, XData('STRING8', self.n, 'data'))
-        self.data = rs['data']
+        pprint(ad)
+        self.data = ad
 
 
 ###############################################################################
@@ -5275,7 +5284,6 @@ class NVidiaControlLowLevel:
         display_mask = self._displays2mask(displays)
         rq = NVCtrlQueryAttributeRequest(self.opcode, target.id(),
                                          target.type(), display_mask, attr)
-
         try_count = 0
         while try_count < _MAX_TRY_COUNT:
             try:
@@ -5298,7 +5306,6 @@ class NVidiaControlLowLevel:
         display_mask = self._displays2mask(displays)
         rq = NVCtrlSetAttributeAndGetStatusRequest(self.opcode, target.id(),
                                                    display_mask, attr, value)
-
         try_count = 0
         while try_count < _MAX_TRY_COUNT:
             try:

@@ -17,22 +17,23 @@
 
 import struct
 import socket
+import time
 from platform import architecture
 from typing import Tuple, Any, List, Dict
 
 from gwe.nvidia import xnet
 
-_XFORMATBYTES = {'CARD8': 1, 'CARD16': 2, 'INT8': 1, 'INT16': 2,
+XFORMATBYTES = {'CARD8': 1, 'CARD16': 2, 'INT8': 1, 'INT16': 2,
                  'PAD': 1, 'BYTE': 1, 'CARD32': 4, 'INT32': 4, 'STRING8': 1}
 
-_XFORMATS = {'CARD8': 'B', 'CARD16': 'H', 'INT8': 'b', 'INT16': 'h',
+XFORMATS = {'CARD8': 'B', 'CARD16': 'H', 'INT8': 'b', 'INT16': 'h',
              'PAD': 'B', 'BYTE': 'B', 'CARD32': 'I', 'INT32': 'i', 'STRING8': 's0I'}
 
 _ARCHW = architecture()[0]
 if _ARCHW.startswith('32bit'):  # adjust struct format strings for 32bit
-    _XFORMATS['CARD32'] = 'L'
-    _XFORMATS['INT32'] = 'l'
-    _XFORMATS['STRING8'] = 's0L'
+    XFORMATS['CARD32'] = 'L'
+    XFORMATS['INT32'] = 'l'
+    XFORMATS['STRING8'] = 's0L'
 
 _XERRORMSG = {1: 'Request error. The major or minor opcode of a request is invalid.',
               2: 'Value error. A request contained a bad argument value.',
@@ -79,7 +80,7 @@ def encode(*x_data_args: XData) -> bytearray:
     bytestream = bytearray()
 
     for x_data in x_data_args:
-        structcode = str(_XFORMATS[x_data.format])
+        structcode = str(XFORMATS[x_data.format])
 
         if x_data.size == 1:
             try:
@@ -110,8 +111,8 @@ def decode(binary: bytes, *arguments: XData) -> Tuple[Dict[str, Any], bytes]:
     result_dict: Dict[str, Any] = {}
 
     for arg in arguments:
-        structcode = _XFORMATS[arg.format]
-        format_size = _XFORMATBYTES[arg.format]
+        structcode = XFORMATS[arg.format]
+        format_size = XFORMATBYTES[arg.format]
 
         if not isinstance(arg.size, str):
             arg_size = arg.size

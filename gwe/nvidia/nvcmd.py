@@ -14,8 +14,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with gwe.  If not, see <http://www.gnu.org/licenses/>.
+import struct
 from typing import Optional, Dict, List, Tuple
 
+from gwe.nvidia.minx import XFORMATS, XFORMATBYTES
 from gwe.nvidia.nvctrl import NVidiaControlLowLevel, NV_CTRL_BUS_TYPE, NV_CTRL_OPERATING_SYSTEM, NV_CTRL_ARCHITECTURE, \
     NV_CTRL_VIDEO_RAM, NV_CTRL_IRQ, NV_CTRL_CONNECTED_DISPLAYS, NV_CTRL_ENABLED_DISPLAYS, NV_CTRL_FRAMELOCK, \
     NV_CTRL_STRING_PRODUCT_NAME, NV_CTRL_STRING_NVIDIA_DRIVER_VERSION, NV_CTRL_STRING_VBIOS_VERSION, \
@@ -27,7 +29,8 @@ from gwe.nvidia.nvctrl import NVidiaControlLowLevel, NV_CTRL_BUS_TYPE, NV_CTRL_O
     NV_CTRL_VIDEO_ENCODER_UTILIZATION, NV_CTRL_VIDEO_DECODER_UTILIZATION, NV_CTRL_STRING_PERFORMANCE_MODES, \
     NV_CTRL_GPU_NVCLOCK_OFFSET, NV_CTRL_GPU_MEM_TRANSFER_RATE_OFFSET, NV_CTRL_THERMAL_COOLER_CURRENT_LEVEL, \
     NV_CTRL_THERMAL_COOLER_SPEED, NV_CTRL_GPU_COOLER_MANUAL_CONTROL, NV_CTRL_XINERAMA, NV_CTRL_MAX_DISPLAYS, \
-    NV_CTRL_PROBE_DISPLAYS
+    NV_CTRL_PROBE_DISPLAYS, NV_CTRL_GPU_PCIE_MAX_LINK_WIDTH, NV_CTRL_GPU_CURRENT_PERFORMANCE_LEVEL, \
+    NV_CTRL_BINARY_DATA_COOLERS_USED_BY_GPU
 from gwe.nvidia.nvtarget import GPU, Target, Screen
 
 _BUS_TYPES: List[str] = ['AGP', 'PCI', 'PCI Express', 'Integrated']
@@ -213,6 +216,12 @@ class NVidiaControl(NVidiaControlLowLevel):
             return None
         return int(reply.value)
 
+    def get_pcie_max_link_width(self, target: Target) -> Optional[int]:
+        reply = self.query_int_attribute(target, [], NV_CTRL_GPU_PCIE_MAX_LINK_WIDTH)
+        if not reply.flags:
+            return None
+        return int(reply.value)
+
     def get_pcie_generation(self, target: Target) -> Optional[int]:
         reply = self.query_int_attribute(target, [], NV_CTRL_GPU_PCIE_GENERATION)
         if not reply.flags:
@@ -225,12 +234,12 @@ class NVidiaControl(NVidiaControlLowLevel):
             return None
         return str(reply.string)
 
-    def get_gpu_utilization(self, target: Target) -> Optional[Dict[str, int]]:
+    def get_gpu_utilization(self, target: Target) -> Dict[str, int]:
         reply = None
         for i in range(10):
             reply = self.query_string_attribute(target, [], NV_CTRL_STRING_GPU_UTILIZATION)
             if not reply.flags:
-                return None
+                return {}
             if reply.string != '':
                 break
             # TODO Log error
@@ -249,6 +258,12 @@ class NVidiaControl(NVidiaControlLowLevel):
 
     def get_video_decoder_utilization(self, target: Target) -> Optional[int]:
         reply = self.query_int_attribute(target, [], NV_CTRL_VIDEO_DECODER_UTILIZATION)
+        if not reply.flags:
+            return None
+        return int(reply.value)
+
+    def get_current_performance_level(self, target: Target) -> Optional[int]:
+        reply = self.query_int_attribute(target, [], NV_CTRL_GPU_CURRENT_PERFORMANCE_LEVEL)
         if not reply.flags:
             return None
         return int(reply.value)
@@ -313,6 +328,20 @@ class NVidiaControl(NVidiaControlLowLevel):
         if not reply.flags:
             return None
         return int(reply.value) == 1
+
+    def get_coolers_used_by_gpu(self, target: Target) -> Optional[Tuple]:
+        reply = self.query_binary_data(target, [], NV_CTRL_BINARY_DATA_COOLERS_USED_BY_GPU)
+        if not reply.flags:
+            return None
+        structcode = XFORMATS['CARD32']
+        format_size = XFORMATBYTES['CARD32']
+        size = len(reply.data) // format_size
+        structcode = str(size) + structcode
+        fans = struct.unpack(structcode, reply.data)
+        if len(fans) > 1:
+            return fans[1:]
+        else:
+            return None
 
     def get_xinerama_enabled(self, target: Target) -> Optional[bool]:
         """return whether Xinerama is enabled or not"""

@@ -34,7 +34,6 @@ import string
 from typing import Tuple
 
 import fcntl  # python3-lockfile
-from pprint import pprint
 
 if hasattr(fcntl, 'F_SETFD'):
     F_SETFD = fcntl.F_SETFD
@@ -101,6 +100,7 @@ def get_x_display(display: str = None) -> Tuple[str, str, int, int]:
 # return a socket connected to X server port
 #
 def get_x_socket(host: str, display_number: int) -> socket.socket:
+    x_socket = None
     try:
         if host:
             x_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -115,7 +115,7 @@ def get_x_socket(host: str, display_number: int) -> socket.socket:
 
     else:
         fcntl.fcntl(x_socket.fileno(), F_SETFD, FD_CLOEXEC)
-
+    x_socket.settimeout(5)
     return x_socket
 
 
@@ -183,10 +183,6 @@ def match_X_auth(family, address, dispno, elist, types=("MIT-MAGIC-COOKIE-1",)):
     num = str(dispno)
 
     matches = {}
-
-    print("elist:")
-    print("num=%s" % num)
-    pprint(elist)
 
     for efam, eaddr, enum, ename, edata in elist:
         if efam == family and eaddr == address and num == enum:
