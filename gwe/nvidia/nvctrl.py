@@ -22,7 +22,7 @@
 #
 import logging
 import sys
-from time import sleep
+# from time import sleep
 from typing import Tuple, List
 
 from gwe.nvidia import minx, xnet
@@ -5318,7 +5318,7 @@ class NVidiaControlLowLevel:
                 try_count += 1
                 if try_count >= _MAX_TRY_COUNT:
                     raise
-                sleep(0.01)
+                # sleep(0.01)
         raise NotImplementedError("This code should not be reachable...")
 
     def query_string_attribute(self, target: Target, displays: List, attr: int) -> NVCtrlQueryStringAttributeReply:
@@ -5344,7 +5344,7 @@ class NVidiaControlLowLevel:
                 try_count += 1
                 if try_count >= _MAX_TRY_COUNT:
                     raise
-                sleep(0.01)
+                # sleep(0.01)
         raise NotImplementedError("This code should not be reachable...")
 
     def set_string_attribute(self, target, displays, attr, data):

@@ -17,7 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with gsi.  If not, see <http://www.gnu.org/licenses/>.
 
-from gwe import main
+from gwe.nvidia import nvcmd
+from gwe.nvidia.nvtarget import GPU
 
 if __name__ == "__main__":
-    main.main()
+    nv = nvcmd.NVidiaControl()
+    nv.open()
+    gpu = GPU(0)
+    for i in range(10000):
+        nv.get_performance_modes(gpu)
+        nv.get_gpu_utilization(gpu)
+    nv.close()
