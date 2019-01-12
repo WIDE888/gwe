@@ -1,5 +1,6 @@
 # GWE
-TBD
+GWE is a GTK system utility designed to provide information, control the fans and overclock your NVIDIA video card 
+and graphics processor.
 
 ## TODO
 
@@ -27,6 +28,37 @@ TBD
 - [ ] Add support for multi-GPU
 - [ ] Allow to select profiles from app indicator
 - [ ] Add support for i18n (internationalization and localization)
+
+## How to help the project
+### We need people with experience in at least one of these things:
+ - X-Protocol
+ - Flatpak
+ - Snap
+ - Meson
+Knowing Python will be also very helpful.
+ 
+### Why do we need it?
+Currently there are some roadblocks that are preventing GWE to move to stable and have an official launch.
+The biggest issues right now are related to the X-Protocol implementation and the distribution of the application.
+
+#### X-Protocol
+To make the app as lightweight as possible, GWE uses the X-Protocol to communicate directly with NV-CONTROL.
+The code that implements the X-Protocol was taken form [disper](https://github.com/phatina/disperd/blob/master/src/nvidia/minx.py),
+a Python 2 application, and ported to Python 3. The current implementation is only able to read data and has to relay
+on the `nvidia-settings` binary to set values (e.g. fan speed or overclock). There is also [this]() bug that makes the 
+communication not 100% reliable. It would be really helpful if someone with more knowledge of the X-Protocol or Python 
+could help fixing these two issues.
+
+#### Moving from PyPI to Flatpak
+Development builds are currently distributed using PyPI. This way of distributing the software is quite simple
+but requires the user to manually install all the non Python dependencies like cairo, glib, appindicator3, etc.
+The current implementation of the historical data uses a new library, Dazzle, that requires Gnome 3.30 which is only
+available, for example, with Ubuntu 18.10 making the latest Ubuntu LTS unsupported.
+A possible solution for all this problem could be distributing the app via Flatpak, since with it all the dependencies
+of the app will be bundled and provided automatically. Currently there is a development branch where the migration to
+Flatpak is taking place, the sandbox is breaking `py3nvml`, making impossible to read all the needed informations. 
+
+
 
 ## Distribution dependencies
 ### (K/X)Ubuntu 18.04 or newer
